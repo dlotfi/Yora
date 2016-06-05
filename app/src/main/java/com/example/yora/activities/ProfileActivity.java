@@ -9,6 +9,7 @@ public class ProfileActivity extends BaseAuthenticatedActivity {
     @Override
     protected void onYoraCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_profile);
+        getSupportActionBar().setTitle("Profile");
         setNavDrawer(new MainNavDrawer(this));
     }
 }
