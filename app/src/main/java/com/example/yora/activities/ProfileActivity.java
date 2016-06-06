@@ -1,5 +1,6 @@
 package com.example.yora.activities;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 
 import com.example.yora.R;
+import com.example.yora.dialogs.ChangePasswordDialog;
 import com.example.yora.infrastructure.User;
 import com.example.yora.views.MainNavDrawer;
 import com.soundcloud.android.crop.Crop;
@@ -157,6 +159,13 @@ public class ProfileActivity extends BaseAuthenticatedActivity implements View.O
 
         if (itemId == R.id.activity_profile_menuEdit) {
             changeState(STATE_EDITING);
+            return true;
+        } else if (itemId == R.id.activity_profile_menuChangePassword) {
+            FragmentTransaction transaction = getFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack(null); // When we hit back key the transaction will be undone
+            ChangePasswordDialog dialog = new ChangePasswordDialog();
+            dialog.show(transaction, null);
             return true;
         }
 

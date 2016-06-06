@@ -1,11 +1,11 @@
-package com.example.yora.fragments;
+package com.example.yora.dialogs;
 
-import android.app.Fragment;
+import android.app.DialogFragment;
 import android.os.Bundle;
 
 import com.example.yora.infrastructure.YoraApplication;
 
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseDialogFragment extends DialogFragment {
     protected YoraApplication application;
 
     @Override
