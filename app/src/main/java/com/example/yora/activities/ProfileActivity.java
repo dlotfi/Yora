@@ -6,12 +6,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 
 import com.example.yora.R;
+import com.example.yora.infrastructure.User;
 import com.example.yora.views.MainNavDrawer;
 import com.soundcloud.android.crop.Crop;
 
@@ -21,6 +27,17 @@ import java.util.List;
 
 public class ProfileActivity extends BaseAuthenticatedActivity implements View.OnClickListener {
     private static final int REQUEST_SELECT_IMAGE = 100;
+
+    private static final int STATE_VIEWING = 1;
+    private static final int STATE_EDITING = 2;
+
+    private static final String BUNDLE_STATE = "BUNDLE_STATE";
+
+    private int _currentState;
+    private EditText _displayNameText;
+    private EditText _emailText;
+    private View _changeAvatarButton;
+    private ActionMode _editProfileActionMode;
     private ImageView _avatarView;
     private View _avatarProgressFrame;
     private File _tempOutputFile;
@@ -28,7 +45,6 @@ public class ProfileActivity extends BaseAuthenticatedActivity implements View.O
     @Override
     protected void onYoraCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_profile);
-        getSupportActionBar().setTitle("Profile");
         setNavDrawer(new MainNavDrawer(this));
 
         if (!isTablet) {
@@ -43,12 +59,32 @@ public class ProfileActivity extends BaseAuthenticatedActivity implements View.O
 
         _avatarView = (ImageView) findViewById(R.id.activity_profile_avatar);
         _avatarProgressFrame = findViewById(R.id.activity_profile_avatarProgressFrame);
+        _changeAvatarButton = findViewById(R.id.activity_profile_changeAvatar);
+        _displayNameText = (EditText) findViewById(R.id.activity_profile_displayName);
+        _emailText = (EditText) findViewById(R.id.activity_profile_email);
         _tempOutputFile = new File(getExternalCacheDir(), "temp_image.jpg");
 
         _avatarView.setOnClickListener(this);
-        findViewById(R.id.activity_profile_changeAvatar).setOnClickListener(this);
-
+        _changeAvatarButton.setOnClickListener(this);
         _avatarProgressFrame.setVisibility(View.GONE);
+
+        User user = application.getAuth().getUser();
+        getSupportActionBar().setTitle(user.getDisplayName());
+
+        if (savedInstanceState == null) {
+            _displayNameText.setText(user.getDisplayName());
+            _emailText.setText(user.getEmail());
+            changeState(STATE_VIEWING);
+        }
+        else
+            changeState(savedInstanceState.getInt(BUNDLE_STATE));
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(BUNDLE_STATE, _currentState);
     }
 
     @Override
@@ -106,6 +142,87 @@ public class ProfileActivity extends BaseAuthenticatedActivity implements View.O
             // TODO: Send tempFileUri to server as new avatar
             _avatarView.setImageResource(0); // Force ImageView to refresh image despite its Uri not changed
             _avatarView.setImageURI(tempFileUri);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_profile, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.activity_profile_menuEdit) {
+            changeState(STATE_EDITING);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void changeState(int state) {
+        if (state == _currentState)
+            return;
+
+        _currentState = state;
+        if (state == STATE_VIEWING) {
+            _displayNameText.setEnabled(false);
+            _emailText.setEnabled(false);
+            _changeAvatarButton.setVisibility(View.VISIBLE);
+
+            if (_editProfileActionMode != null) {
+                _editProfileActionMode.finish();
+                _editProfileActionMode = null;
+            }
+        } else if (state == STATE_EDITING) {
+            _displayNameText.setEnabled(true);
+            _emailText.setEnabled(true);
+            _changeAvatarButton.setVisibility(View.GONE);
+
+            _editProfileActionMode = toolbar.startActionMode(new EditProfileActionCallback());
+        } else
+            throw new IllegalArgumentException("Invalid state: " + state);
+
+    }
+
+    private class EditProfileActionCallback implements ActionMode.Callback {
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            getMenuInflater().inflate(R.menu.activity_profile_edit, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.activity_profile_edit_menuDone) {
+                // TODO Send request to update display name and email
+                User user = application.getAuth().getUser();
+                user.setDisplayName(_displayNameText.getText().toString());
+                user.setEmail(_emailText.getText().toString());
+                changeState(STATE_VIEWING);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            if (_currentState != STATE_VIEWING) { // When hitting cancel
+                User user = application.getAuth().getUser();
+                _displayNameText.setText(user.getDisplayName());
+                _emailText.setText(user.getEmail());
+                changeState(STATE_VIEWING);
+            }
         }
     }
 }
