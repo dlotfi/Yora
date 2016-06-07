@@ -2,6 +2,7 @@ package com.example.yora.infrastructure;
 
 import android.app.Application;
 
+import com.example.yora.services.Module;
 import com.squareup.otto.Bus;
 
 public class YoraApplication extends Application {
@@ -21,6 +22,7 @@ public class YoraApplication extends Application {
     public void onCreate() {
         super.onCreate();
         _auth = new Auth(this);
+        Module.register(this);
     }
 
     public Auth getAuth() {

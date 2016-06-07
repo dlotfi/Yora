@@ -57,7 +57,7 @@ public class ChangePasswordDialog extends BaseDialogFragment implements View.OnC
     }
 
     @Subscribe
-    public void onPasswordChanged(Account.ChangeAvatarResponse response) {
+    public void onPasswordChanged(Account.ChangePasswordResponse response) {
         if (_progressDialog != null) {
             _progressDialog.dismiss();
             _progressDialog = null;
