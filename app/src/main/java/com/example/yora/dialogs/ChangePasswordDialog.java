@@ -72,7 +72,6 @@ public class ChangePasswordDialog extends BaseDialogFragment implements View.OnC
         else {
             Toast.makeText(getActivity(), "Password Updated!", Toast.LENGTH_SHORT).show();
             dismiss();
-            application.getAuth().getUser().setHasPassword(true);
         }
     }
 }

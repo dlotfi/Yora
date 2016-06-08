@@ -12,6 +12,8 @@ import com.example.yora.activities.MainActivity;
 import com.example.yora.activities.ProfileActivity;
 import com.example.yora.activities.SentMessagesActivity;
 import com.example.yora.infrastructure.User;
+import com.example.yora.services.Account;
+import com.squareup.otto.Subscribe;
 
 public class MainNavDrawer extends NavDrawer {
     private final TextView _displayNameText;
@@ -40,5 +42,10 @@ public class MainNavDrawer extends NavDrawer {
         _displayNameText.setText(loggedInUser.getDisplayName());
 
         // TODO: change avatar image to avatarUrl from loggedInUser
+    }
+
+    @Subscribe
+    public void UserDetailsUpdated(Account.UserDetailsUpdatedEvent event){
+        _displayNameText.setText(event.User.getDisplayName());
     }
 }
