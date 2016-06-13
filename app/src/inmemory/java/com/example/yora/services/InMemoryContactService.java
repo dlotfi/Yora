@@ -26,9 +26,9 @@ public class InMemoryContactService extends BaseInMemoryService {
     @Subscribe
     public void getContacts(Contacts.GetContactsRequest request){
         Contacts.GetContactsResponse response =  new Contacts.GetContactsResponse();
-        response.contacts = new ArrayList<>();
+        response.Contacts = new ArrayList<>();
         for (int i=0;i <10; i++){
-            response.contacts.add(createFakeUser(i,true));
+            response.Contacts.add(createFakeUser(i,true));
         }
         postDelayed(response);
     }

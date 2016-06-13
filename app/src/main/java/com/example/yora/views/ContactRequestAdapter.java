@@ -1,8 +1,6 @@
 package com.example.yora.views;
 
-import android.net.Uri;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +11,6 @@ import android.widget.TextView;
 import com.example.yora.R;
 import com.example.yora.activities.BaseActivity;
 import com.example.yora.services.entities.ContactRequest;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 public class ContactRequestAdapter extends ArrayAdapter<ContactRequest> {
