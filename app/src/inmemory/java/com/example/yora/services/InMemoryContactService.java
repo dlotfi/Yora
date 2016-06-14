@@ -57,4 +57,11 @@ public class InMemoryContactService extends BaseInMemoryService {
                 "http://www.gravatar.com/avatar/" + idString + "?d=identicon&s=64"
         );
     }
+
+    @Subscribe
+    public void removeContact(Contacts.RemoveContactRequest request) {
+        Contacts.RemoveContactResponse response = new Contacts.RemoveContactResponse();
+        response.RemovedContactId = request.ContactId;
+        postDelayed(response);
+    }
 }
