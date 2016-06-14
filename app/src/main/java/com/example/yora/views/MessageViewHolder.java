@@ -56,6 +56,6 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
             _cardView.setCardElevation(3);
         }
 
-        _cardView.setBackgroundColor(context.getResources().getColor(colorResourceId));
+        _cardView.setCardBackgroundColor(context.getResources().getColor(colorResourceId));
     }
 }
