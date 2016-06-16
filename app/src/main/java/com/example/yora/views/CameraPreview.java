@@ -55,7 +55,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         parameters.setPreviewSize(targetPreviewSize.width, targetPreviewSize.height);
 
         Camera.Size targetImageSize = getClosestSize(1024, 1280, parameters.getSupportedPictureSizes());
-        parameters.setPictureSize(targetPreviewSize.width, targetPreviewSize.height);
+        parameters.setPictureSize(targetImageSize.width, targetImageSize.height);
 
         _camera.setDisplayOrientation(90);
 
