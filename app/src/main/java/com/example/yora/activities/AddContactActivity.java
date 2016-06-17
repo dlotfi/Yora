@@ -138,9 +138,9 @@ public class AddContactActivity extends BaseAuthenticatedActivity implements Ada
             return;
         }
 
-        Intent intent = new Intent();
-        intent.putExtra(RESULT_CONTACT, _selectedUser);
-        setResult(RESULT_OK, intent);
+        Intent data = new Intent();
+        data.putExtra(RESULT_CONTACT, _selectedUser);
+        setResult(RESULT_OK, data);
         finish();
     }
 }

@@ -23,6 +23,7 @@ import com.squareup.picasso.Picasso;
 public class SendMessageActivity extends BaseAuthenticatedActivity implements View.OnClickListener {
     public static final String EXTRA_IMAGE_PATH = "EXTRA_IMAGE_PATH";
     public static final String EXTRA_CONTACT = "EXTRA_CONTACT";
+    public static final String RESULT_MESSAGE = "RESULT_MESSAGE";
 
     public static final int MAX_IMAGE_HEIGHT = 1000;
 
@@ -41,7 +42,6 @@ public class SendMessageActivity extends BaseAuthenticatedActivity implements Vi
         if (savedInstanceState != null) {
             _request = savedInstanceState.getParcelable(STATE_REQUEST);
         }
-
 
         Uri imageUri = getIntent().getParcelableExtra(EXTRA_IMAGE_PATH);
         if (imageUri != null) {
@@ -173,7 +173,9 @@ public class SendMessageActivity extends BaseAuthenticatedActivity implements Vi
             return;
         }
 
-        setResult(RESULT_OK);
+        Intent data = new Intent();
+        data.putExtra(RESULT_MESSAGE, response.Message);
+        setResult(RESULT_OK, data);
         finish();
     }
 }
