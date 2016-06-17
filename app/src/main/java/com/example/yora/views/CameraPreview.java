@@ -12,7 +12,7 @@ import java.util.List;
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "CameraPreview";
 
-    private final SurfaceHolder _surfaceHolder;
+    private SurfaceHolder _surfaceHolder;
     private Camera _camera;
     private Camera.CameraInfo _cameraInfo;
     private boolean _isSurfaceCreaated;
@@ -98,6 +98,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        if (_surfaceHolder != holder) {
+            _surfaceHolder = holder;
+            _surfaceHolder.addCallback(this);
+        }
+
         _isSurfaceCreaated = true;
 
         if (_camera != null)
@@ -111,11 +116,17 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        if (_camera == null || _surfaceHolder == null)
+        _isSurfaceCreaated = false;
+        _surfaceHolder.removeCallback(this);
+        _surfaceHolder = null;
+
+        if (_camera == null)
             return;
 
         try {
             _camera.stopPreview();
+            _camera = null;
+            _cameraInfo = null;
         } catch (Exception e) {
             Log.e(TAG, "Could not stop camera preview", e);
         }
