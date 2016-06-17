@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,6 +29,8 @@ public class ContactRequestViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void populate(Context context, ContactRequest request) {
+        itemView.setTag(request);
+
         _displayName.setText(request.getUser().getDisplayName());
         Picasso.with(context)
                .load(request.getUser().getAvatarUrl())
@@ -42,5 +45,9 @@ public class ContactRequestViewHolder extends RecyclerView.ViewHolder {
         } else {
             _createdAt.setText("Received at " + dateText);
         }
+    }
+
+    public void setOnClickListener(View.OnClickListener listener) {
+        itemView.setOnClickListener(listener);
     }
 }

@@ -4,7 +4,9 @@ import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,8 +22,8 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
     private TextView _sentReceived;
     private View _backgroundView;
 
-    public MessageViewHolder(View itemView) {
-        super(itemView);
+    public MessageViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        super(inflater.inflate(R.layout.list_item_message, parent, false));
         _cardView = (CardView) itemView;
         _avatar = (ImageView) itemView.findViewById(R.id.list_item_message_avatar);
         _displayName = (TextView) itemView.findViewById(R.id.list_item_message_displayName);
@@ -31,7 +33,7 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void populate(Context context, Message message) {
-        itemView.setTag(message);
+        _backgroundView.setTag(message);
 
         Picasso.with(context)
                .load(message.getOtherUser().getAvatarUrl())
@@ -61,7 +63,7 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
         _cardView.setCardBackgroundColor(context.getResources().getColor(colorResourceId));
     }
 
-    public View getBackgroundView() {
-        return _backgroundView;
+    public void setOnClickListener(View.OnClickListener listener) {
+        _backgroundView.setOnClickListener(listener);
     }
 }
