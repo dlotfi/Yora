@@ -193,7 +193,7 @@ public class NewMessageActivity extends BaseAuthenticatedActivity implements Vie
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_SEND_MESSAGE && requestCode == RESULT_OK) {
+        if (requestCode == REQUEST_SEND_MESSAGE && resultCode == RESULT_OK) {
             setResult(RESULT_OK);
             finish();
         }
