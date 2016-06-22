@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import retrofit.Callback;
 import retrofit.http.Body;
+import retrofit.http.DELETE;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
@@ -12,7 +13,10 @@ import retrofit.http.Multipart;
 import retrofit.http.POST;
 import retrofit.http.PUT;
 import retrofit.http.Part;
+import retrofit.http.Path;
+import retrofit.http.Query;
 import retrofit.mime.TypedFile;
+import retrofit.mime.TypedString;
 
 
 public interface YoraWebService {
@@ -53,7 +57,71 @@ public interface YoraWebService {
     void updateGcmRegistration(@Body Account.UpdateGcmRegistrationRequest request, Callback<Account.UpdateGcmRegistrationResponse> callback);
 
     // ---------------------------------------------------------------------------------------------
+    // Contacts
+    @GET("/api/v1/users")
+    void searchUsers(@Query("query") String query, Callback<Contacts.SearchUsersResponse> callback);
+
+    @POST("/api/v1/contact-requests/{user}")
+    void sendContactRequest(@Path("user") int userId, Callback<Contacts.SendContactRequestResponse> callback);
+
+    @PUT("/api/v1/contact-requests/{user}")
+    void respondToContactRequest(@Path("user") int userId, @Body RespondToContactRequest request, Callback<Contacts.RespondToContactRequestResponse> callback);
+
+    @DELETE("/api/v1/contacts/{user}")
+    void removeContact(@Path("user") int userId, Callback<Contacts.RemoveContactResponse> callback);
+
+    @GET("/api/v1/contact_requests/sent")
+    void getContactRequestsFromUs(Callback<Contacts.GetContactRequestsResponse> callback);
+
+    @GET("/api/v1/contact-requests/received")
+    void getContactRequestsToUs(Callback<Contacts.GetContactRequestsResponse> callback);
+
+    @GET("/api/v1/contacts")
+    void getContacts(Callback<Contacts.GetContactsResponse> callback);
+
+    // ---------------------------------------------------------------------------------------------
+    // Messages
+
+    @Multipart
+    @POST("/api/v1/messages")
+    void sendMessage(
+            @Part("message")TypedString message,
+            @Part("to")TypedString to,
+            @Part("photo")TypedFile photo,
+            Callback<Messages.SendMessageResponse> callback);
+
+    @DELETE("/api/v1/messages/{id}")
+    void deleteMessage(@Path("id") int messageId, Callback<Messages.DeleteMessageResponse> callback);
+
+    @PUT("/api/v1/messages/{id}/is-read")
+    void markMessageAsRead(@Path("id") int messageId, Callback<Messages.MarkMessageAsReadResponse> callback);
+
+    @GET("/api/v1/messages")
+    void searchMessages(
+            @Query("contactId") int from,
+            @Query("includeSent") boolean includeSent,
+            @Query("includeReceived") boolean includeReceived,
+            Callback<Messages.SeacrhMessagesResponse> callback);
+
+    @GET("/api/v1/messages")
+    void searchMessages(
+            @Query("includeSent") boolean includeSent,
+            @Query("includeReceived") boolean includeReceived,
+            Callback<Messages.SeacrhMessagesResponse> callback);
+
+    @GET("/api/v1/messages/{id}")
+    void getMessageDetails(@Path("id") int id, Callback<Messages.GetMessageDetailsResponse> callback);
+
+    // ---------------------------------------------------------------------------------------------
     // DTOs
+    public class RespondToContactRequest {
+        public String Response;
+
+        public RespondToContactRequest(String response) {
+            Response = response;
+        }
+    }
+
     public class LoginResponse extends ServiceResponse {
         @SerializedName(".expires")
         public String Expires;
