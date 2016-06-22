@@ -2,48 +2,30 @@ package com.example.yora.infrastructure;
 
 import android.util.Log;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Converter;
-import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public abstract class RetrofitCallback<T extends ServiceResponse> implements Callback<T> {
     private static final String TAG = "RetrofitCallback";
 
     protected final Class<T> resultType;
-    protected final Retrofit retrofit;
 
-    public RetrofitCallback(Class<T> resultType, Retrofit retrofit) {
+    public RetrofitCallback(Class<T> resultType) {
         this.resultType = resultType;
-        this.retrofit = retrofit;
     }
 
     protected abstract void onResponse(T t);
 
     @Override
-    public void onResponse(Call<T> call, Response<T> response) {
-        if (response.isSuccessful()) {
-            onResponse(response.body());
-        } else {
-            Log.e(TAG, "Error " + String.valueOf(response.code())+ " : " + response.raw().message());
-
-            try {
-                Converter<ResponseBody, T> converter = retrofit.responseBodyConverter(resultType, new Annotation[0]);
-                onResponse(converter.convert(response.errorBody()));
-            } catch (Exception e) {
-                Log.e(TAG, "Error " + String.valueOf(response.code())+ " : " + response.raw().message());
-            }
-        }
+    public void success(T t, Response response) {
+        onResponse(t);
     }
 
     @Override
-    public void onFailure(Call<T> call, Throwable t) {
-        Log.e(TAG, "Error sending request with " + resultType.getName() + " response", t);
+    public void failure(RetrofitError error) {
+        Log.e(TAG, "Error sending request with " + resultType.getName() + " response", error);
 
         ServiceResponse errorResult;
         try {
@@ -52,12 +34,33 @@ public abstract class RetrofitCallback<T extends ServiceResponse> implements Cal
             throw new RuntimeException("Error creating result type " + resultType.getName(), e);
         }
 
-        if (t instanceof IOException) {
+        if (error.getKind() == RetrofitError.Kind.NETWORK) {
             errorResult.setCriticalError("Unable to connect to Yora servers!");
-        } else {
-            errorResult.setCriticalError("Unknown error. Please try again.");
+            onResponse((T) errorResult);
+            return;
         }
 
-        onResponse((T) errorResult);
+        if (error.getSuccessType() == null) {
+            errorResult.setCriticalError("Unknown error. Please try again.");
+            onResponse((T) errorResult);
+            return;
+        }
+
+        try {
+            if (error.getBody() instanceof ServiceResponse) {
+                ServiceResponse result = (ServiceResponse) error.getBody();
+                if (result.didSucceed()) {
+                    result.setCriticalError("Unknown error. Please try again.");
+                }
+
+                onResponse((T) result);
+            } else {
+                throw new RuntimeException("Result class " + resultType.getName() + " does not extend ServiceResponse");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Unknown error", e);
+            errorResult.setCriticalError("Unknown error. Please try again.");
+            onResponse((T) errorResult);
+        }
     }
 }

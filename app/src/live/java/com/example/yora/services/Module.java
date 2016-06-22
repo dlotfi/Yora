@@ -9,6 +9,10 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -20,12 +24,11 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit.RequestInterceptor;
+import retrofit.RestAdapter;
+import retrofit.client.OkClient;
+import retrofit.converter.GsonConverter;
+
 
 public class Module {
     public static void register(YoraApplication application) {
@@ -45,23 +48,20 @@ public class Module {
 
         OkHttpClient client = new OkHttpClient();
         client.interceptors().add(new AuthInterceptor(application.getAuth()));
-        client.interceptors().add(new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request().newBuilder()
-                        .addHeader("X-Student", YoraApplication.STUDENT_TOKEN)
-                        .build();
-                return chain.proceed(request);
-            }
-        });
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(YoraApplication.API_ENDPOINT.toString())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(client)
+        RestAdapter adapter = new RestAdapter.Builder()
+                .setEndpoint(YoraApplication.API_ENDPOINT.toString())
+                .setConverter(new GsonConverter(gson))
+                .setClient(new OkClient(client))
+                .setRequestInterceptor(new RequestInterceptor() {
+                    @Override
+                    public void intercept(RequestFacade request) {
+                        request.addHeader("X-Student", YoraApplication.STUDENT_TOKEN);
+                    }
+                })
                 .build();
 
-        return retrofit.create(YoraWebService.class);
+        return adapter.create(YoraWebService.class);
     }
 
     private static class AuthInterceptor implements Interceptor {

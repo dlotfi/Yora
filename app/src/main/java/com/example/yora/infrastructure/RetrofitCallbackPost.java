@@ -4,15 +4,13 @@ import android.util.Log;
 
 import com.squareup.otto.Bus;
 
-import retrofit2.Retrofit;
-
 public class RetrofitCallbackPost<T extends ServiceResponse> extends RetrofitCallback<T> {
     private static final String TAG = "RetrofitCallbackPost";
 
     private final Bus _bus;
 
-    public RetrofitCallbackPost(Class<T> resultType, Retrofit retrofit, Bus bus) {
-        super(resultType, retrofit);
+    public RetrofitCallbackPost(Class<T> resultType, Bus bus) {
+        super(resultType);
         _bus = bus;
     }
 
