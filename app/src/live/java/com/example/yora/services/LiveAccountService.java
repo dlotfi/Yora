@@ -123,7 +123,9 @@ public class LiveAccountService extends BaseLiveService {
         api.loginWithExternalToken(request, new RetrofitCallbackPost<Account.LoginWithExternalTokenResponse>(Account.LoginWithExternalTokenResponse.class, bus) {
                @Override
                protected void onResponse(Account.LoginWithExternalTokenResponse response) {
-                   loginUser(response);
+                   if (response.didSucceed()) {
+                       loginUser(response);
+                   }
                    super.onResponse(response);
                }
            });
@@ -134,7 +136,9 @@ public class LiveAccountService extends BaseLiveService {
         api.registerExternal(request, new RetrofitCallbackPost<Account.RegisterWithExternalTokenResponse>(Account.RegisterWithExternalTokenResponse.class, bus) {
                @Override
                protected void onResponse(Account.RegisterWithExternalTokenResponse response) {
-                   loginUser(response);
+                   if (response.didSucceed()) {
+                       loginUser(response);
+                   }
                    super.onResponse(response);
                }
            });

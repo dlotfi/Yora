@@ -1,5 +1,6 @@
 package com.example.yora.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,12 +11,20 @@ import com.example.yora.services.Account;
 import com.squareup.otto.Subscribe;
 
 public class RegisterActivity extends BaseActivity implements View.OnClickListener {
+    public static final String EXTRA_EXTERNAL_PROVIDER = "EXTRA_EXTERNAL_PROVIDER";
+    public static final String EXTRA_EXTERNAL_USERNAME = "EXTRA_EXTERNAL_USERNAME";
+    public static final String EXTRA_EXTERNAL_TOKEN = "EXTRA_EXTERNAL_TOKEN";
+
     private Button _registerButton;
     private EditText _userNameText;
     private EditText _emailText;
     private EditText _passwordText;
     private View _progressBar;
     private String _defaultRegisterButtonText;
+
+    private boolean _isExternalLogin;
+    private String _externalToken;
+    private String _externalProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +41,16 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
 
         _registerButton.setOnClickListener(this);
         _progressBar.setVisibility(View.GONE);
+
+        Intent intent = getIntent();
+        _externalToken = intent.getStringExtra(EXTRA_EXTERNAL_TOKEN);
+        _externalProvider = intent.getStringExtra(EXTRA_EXTERNAL_PROVIDER);
+        _isExternalLogin = _externalToken != null;
+
+        if (_isExternalLogin) {
+            _passwordText.setVisibility(View.GONE);
+            _userNameText.setText(intent.getStringExtra(EXTRA_EXTERNAL_USERNAME));
+        }
     }
 
     @Override
@@ -44,10 +63,18 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             _passwordText.setEnabled(false);
             _emailText.setEnabled(false);
 
-            bus.post(new Account.RegisterRequest(
-                    _userNameText.getText().toString(),
-                    _emailText.getText().toString(),
-                    _passwordText.getText().toString()));
+            if (_isExternalLogin) {
+                bus.post(new Account.RegisterWithExternalTokenRequest(
+                        _userNameText.getText().toString(),
+                        _emailText.getText().toString(),
+                        _externalProvider,
+                        _externalToken));
+            } else {
+                bus.post(new Account.RegisterRequest(
+                        _userNameText.getText().toString(),
+                        _emailText.getText().toString(),
+                        _passwordText.getText().toString()));
+            }
         }
     }
 
@@ -62,21 +89,22 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void onUserResponse(Account.UserResponse response) {
-        _progressBar.setVisibility(View.GONE);
-        _registerButton.setText(_defaultRegisterButtonText);
-        _registerButton.setEnabled(true);
-        _userNameText.setEnabled(true);
-        _passwordText.setEnabled(true);
-        _emailText.setEnabled(true);
+        if (response.didSucceed()) {
+            setResult(RESULT_OK);
+            finish();
+        }
 
         response.showErrorToast(this);
         _userNameText.setError(response.getPropertyError("userName"));
         _passwordText.setError(response.getPropertyError("password"));
         _emailText.setError(response.getPropertyError("email"));
 
-        if (response.didSucceed()) {
-            setResult(RESULT_OK);
-            finish();
-        }
+        _registerButton.setEnabled(true);
+        _userNameText.setEnabled(true);
+        _passwordText.setEnabled(true);
+        _emailText.setEnabled(true);
+
+        _progressBar.setVisibility(View.GONE);
+        _registerButton.setText(_defaultRegisterButtonText);
     }
 }
